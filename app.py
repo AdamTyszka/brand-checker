@@ -2,29 +2,23 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 
-st.set_page_config(page_title="Sprawdzanie Marek", layout="centered")
-st.title("🔍 Sprawdź obecność marki w sklepach online")
+st.set_page_config(page_title="Sprawdzanie Marek – TIM", layout="centered")
+st.title("🔍 Sprawdź obecność marki na TIM.pl")
 
-# Dokładna funkcja sprawdzająca obecność marki na stronie
-def check_brand_on_site(brand, site):
-    query = f"site:{site} {brand}"
-    url = f"https://www.google.com/search?q={query}"
-    headers = {"User-Agent": "Mozilla/5.0"}
+# Funkcja do sprawdzania obecności marki na TIM.pl
+def check_brand_on_tim(brand):
+    url = f"https://www.tim.pl/szukaj?q={brand}"
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
     try:
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
-            search_results = soup.select("a[href^='https://']")
-
-            # Tylko linki z danej domeny (np. allegro.pl)
-            valid_links = [link['href'] for link in search_results if site in link['href']]
-
-            if len(valid_links) == 0:
-                return "❌ Brak"
+            product_tiles = soup.select("div.catalog-tile")
+            if len(product_tiles) > 0:
+                return "✅ Obecna"
             else:
-                for link in valid_links:
-                    if brand.lower() in link.lower():
-                        return "✅ Obecna"
                 return "❌ Brak"
         else:
             return "⚠️ Błąd zapytania"
@@ -38,17 +32,13 @@ if st.button("Sprawdź marki") and brand_input:
     brands = [line.strip() for line in brand_input.split("\n") if line.strip()]
     results = []
 
-    with st.spinner("🔄 Sprawdzam marki..."):
+    with st.spinner("🔄 Sprawdzam marki na TIM.pl..."):
         for brand in brands:
-            allegro_status = check_brand_on_site(brand, "allegro.pl")
-            tim_status = check_brand_on_site(brand, "tim.pl")
-            conrad_status = check_brand_on_site(brand, "conrad.pl")
+            tim_status = check_brand_on_tim(brand)
 
             results.append({
                 "Marka": brand,
-                "Allegro": allegro_status,
-                "TIM": tim_status,
-                "Conrad": conrad_status
+                "TIM.pl": tim_status
             })
 
     st.success("Gotowe! ✅")
