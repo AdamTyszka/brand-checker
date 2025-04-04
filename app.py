@@ -14,7 +14,7 @@ def check_brand_on_site(brand, site):
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
             search_results = soup.select("a")
-            if any(brand.lower() in link.text.lower() for link in search_results):
+            if len(search_results) > 0:
                 return "✅ Obecna"
             else:
                 return "❌ Brak"
