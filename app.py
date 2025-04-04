@@ -5,9 +5,9 @@ from bs4 import BeautifulSoup
 st.set_page_config(page_title="Sprawdzanie Marek – TIM", layout="centered")
 st.title("🔍 Sprawdź obecność marki na TIM.pl")
 
-# Funkcja do sprawdzania obecności marki na TIM.pl z poprawionymi nagłówkami
+# Funkcja do sprawdzania obecności marki na TIM.pl
 def check_brand_on_tim(brand):
-    url = f"https://www.tim.pl/szukaj?q={brand}"
+    url = f"https://www.tim.pl/wyszukiwanie/wyniki/?q={brand}&p=1"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                       "AppleWebKit/537.36 (KHTML, like Gecko) "
