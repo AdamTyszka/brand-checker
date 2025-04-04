@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 st.set_page_config(page_title="Sprawdzanie Marek", layout="centered")
 st.title("🔍 Sprawdź obecność marki w sklepach online")
 
+# Funkcja do sprawdzania obecności marki na stronie
 def check_brand_on_site(brand, site):
     query = f"site:{site} {brand}"
     url = f"https://www.google.com/search?q={query}"
@@ -15,21 +16,25 @@ def check_brand_on_site(brand, site):
             soup = BeautifulSoup(response.text, "html.parser")
             search_results = soup.select("a")
             if len(search_results) > 0:
-                return "✅ Obecna"
+                if any(brand.lower() in link.text.lower() for link in search_results):
+                    return "✅ Obecna"
+                else:
+                    return "❌ Brak"
             else:
-                return "❌ Brak"
+                return "⚠️ Brak wyników"
         else:
             return "⚠️ Błąd zapytania"
     except Exception as e:
         return f"❌ Błąd: {e}"
 
+# Interfejs użytkownika
 brand_input = st.text_area("Wprowadź marki do sprawdzenia (jedna na linię):")
 
 if st.button("Sprawdź marki") and brand_input:
     brands = [line.strip() for line in brand_input.split("\n") if line.strip()]
     results = []
 
-    with st.spinner("Sprawdzam marki..."):
+    with st.spinner("🔄 Sprawdzam marki..."):
         for brand in brands:
             allegro_status = check_brand_on_site(brand, "allegro.pl")
             tim_status = check_brand_on_site(brand, "tim.pl")
@@ -42,8 +47,8 @@ if st.button("Sprawdź marki") and brand_input:
                 "Conrad": conrad_status
             })
 
-    st.success("Gotowe!")
-    st.write("### Wyniki")
+    st.success("Gotowe! ✅")
+    st.write("### 📊 Wyniki wyszukiwania:")
     st.table(results)
 else:
-    st.info("Wprowadź marki i kliknij przycisk powyżej, aby rozpocząć.")
+    st.info("✏️ Wprowadź marki i kliknij przycisk powyżej, aby rozpocząć.")
