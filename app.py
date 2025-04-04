@@ -5,11 +5,17 @@ from bs4 import BeautifulSoup
 st.set_page_config(page_title="Sprawdzanie Marek – TIM", layout="centered")
 st.title("🔍 Sprawdź obecność marki na TIM.pl")
 
-# Funkcja do sprawdzania obecności marki na TIM.pl
+# Funkcja do sprawdzania obecności marki na TIM.pl z poprawionymi nagłówkami
 def check_brand_on_tim(brand):
     url = f"https://www.tim.pl/szukaj?q={brand}"
     headers = {
-        "User-Agent": "Mozilla/5.0"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/122.0.0.0 Safari/537.36",
+        "Accept-Language": "pl-PL,pl;q=0.9",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Referer": "https://www.tim.pl/",
+        "Connection": "keep-alive"
     }
     try:
         response = requests.get(url, headers=headers)
@@ -21,11 +27,11 @@ def check_brand_on_tim(brand):
             else:
                 return "❌ Brak"
         else:
-            return "⚠️ Błąd zapytania"
+            return f"⚠️ Błąd zapytania ({response.status_code})"
     except Exception as e:
         return f"❌ Błąd: {e}"
 
-# Interfejs użytkownika
+# Interfejs użytkownika Streamlit
 brand_input = st.text_area("Wprowadź marki do sprawdzenia (jedna na linię):")
 
 if st.button("Sprawdź marki") and brand_input:
