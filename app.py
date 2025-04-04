@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 st.set_page_config(page_title="Sprawdzanie Marek", layout="centered")
 st.title("🔍 Sprawdź obecność marki w sklepach online")
 
-# Funkcja do sprawdzania obecności marki na stronie (lepsze wykrywanie!)
+# Dokładna funkcja sprawdzająca obecność marki na stronie
 def check_brand_on_site(brand, site):
     query = f"site:{site} {brand}"
     url = f"https://www.google.com/search?q={query}"
@@ -14,17 +14,18 @@ def check_brand_on_site(brand, site):
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
-            search_results = soup.select("a")
-            if len(search_results) > 0:
-                if any(
-                    brand.lower() in link.text.lower() or brand.lower() in link['href'].lower()
-                    for link in search_results if link.has_attr("href")
-                ):
-                    return "✅ Obecna"
-                else:
-                    return "❌ Brak"
+            search_results = soup.select("a[href^='https://']")
+
+            # Tylko linki z danej domeny (np. allegro.pl)
+            valid_links = [link['href'] for link in search_results if site in link['href']]
+
+            if len(valid_links) == 0:
+                return "❌ Brak"
             else:
-                return "⚠️ Brak wyników"
+                for link in valid_links:
+                    if brand.lower() in link.lower():
+                        return "✅ Obecna"
+                return "❌ Brak"
         else:
             return "⚠️ Błąd zapytania"
     except Exception as e:
